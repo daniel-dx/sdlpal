@@ -290,3 +290,6 @@ tools/__pycache__/
 # 不需要的第三方子模块（项目未引用）
 3rd/googletest/
 3rd/mingw-std-threads/
+
+# 打包进 APK 的游戏资源（版权文件不入库）
+android/app/src/main/assets/gamedata/

@@ -400,6 +400,15 @@ int SAF_access(const char *path, int mode)
 EXTERN_C_LINKAGE
 FILE *SAF_fopen(const char *path, const char *mode)
 {
+    if( strncmp(path, "/data", 5) == 0 ) {
+        int flags = O_RDONLY;
+        if (strncmp(mode, "w", 1) == 0) flags = O_WRONLY | O_CREAT | O_TRUNC;
+        else if (strncmp(mode, "a", 1) == 0) flags = O_WRONLY | O_CREAT | O_APPEND;
+        else if (strncmp(mode, "r+", 2) == 0 || strncmp(mode, "w+", 2) == 0) flags = O_RDWR | O_CREAT;
+        int fd = open(path, flags, 0644);
+        if (fd < 0) return NULL;
+        return fdopen(fd, mode);
+    }
     JNIEnv* env = getJNIEnv();
     jclass clazz = env->FindClass("com/sdlpal/sdlpal/MainActivity");
     jmethodID mid = env->GetStaticMethodID(clazz, "SAF_fopen", "(Ljava/lang/String;Ljava/lang/String;)I");

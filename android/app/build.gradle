@@ -27,6 +27,10 @@ android {
         }
     }
 
+    aaptOptions {
+        noCompress 'mkf', 'rpg', 'msg', 'dat', 'avi', 'glsl', 'glslp'
+    }
+
     buildTypes {
         release {
             minifyEnabled false

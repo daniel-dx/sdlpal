@@ -43,6 +43,7 @@ import androidx.activity.result.*;
 import androidx.activity.result.contract.*;
 
 import java.io.*;
+import android.content.res.AssetManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -299,19 +300,132 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private boolean hasBuiltinAssets() {
+        try {
+            String[] files = getAssets().list("gamedata");
+            return files != null && files.length > 0;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    private String getBuiltinGamePath() {
+        return getApplicationContext().getFilesDir().getPath() + "/gamedata";
+    }
+
+    private void extractAssets() {
+        String destPath = getBuiltinGamePath();
+        File destDir = new File(destPath);
+        File marker = new File(destPath + "/.extracted");
+        if (marker.exists()) return;
+
+        destDir.mkdirs();
+        new File(destPath + "/shaders").mkdirs();
+
+        try {
+            AssetManager am = getAssets();
+            // 复制 gamedata/ 下的文件
+            String[] files = am.list("gamedata");
+            if (files != null) {
+                for (String f : files) {
+                    if (f.equals("shaders")) continue;
+                    copyAssetFile(am, "gamedata/" + f, destPath + "/" + f);
+                }
+            }
+            // 复制 gamedata/shaders/ 下的文件
+            String[] shaderFiles = am.list("gamedata/shaders");
+            if (shaderFiles != null) {
+                for (String f : shaderFiles) {
+                    copyAssetFile(am, "gamedata/shaders/" + f, destPath + "/shaders/" + f);
+                }
+            }
+            marker.createNewFile();
+            Log.i(TAG, "Assets extracted to " + destPath);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to extract assets", e);
+        }
+    }
+
+    private void copyAssetFile(AssetManager am, String assetPath, String destPath) throws IOException {
+        InputStream in = am.open(assetPath);
+        FileOutputStream out = new FileOutputStream(destPath);
+        byte[] buf = new byte[65536];
+        int len;
+        while ((len = in.read(buf)) > 0) {
+            out.write(buf, 0, len);
+        }
+        out.close();
+        in.close();
+    }
+
+    private void writeDefaultConfig(String gamePath) {
+        File cfgFile = new File(gamePath + "/sdlpal.cfg");
+        if (cfgFile.exists()) return;
+        try {
+            FileOutputStream out = new FileOutputStream(cfgFile);
+            String cfg = "KeepAspectRatio=1\n" +
+                "FullScreen=0\n" +
+                "LaunchSetting=0\n" +
+                "Stereo=1\n" +
+                "UseSurroundOPL=1\n" +
+                "EnableKeyRepeat=0\n" +
+                "UseTouchOverlay=1\n" +
+                "EnableAviPlay=1\n" +
+                "EnableGLSL=1\n" +
+                "EnableHDR=1\n" +
+                "SurroundOPLOffset=384\n" +
+                "LogLevel=0\n" +
+                "AudioDevice=-1\n" +
+                "AudioBufferSize=1024\n" +
+                "OPLSampleRate=49716\n" +
+                "ResampleQuality=4\n" +
+                "SampleRate=48000\n" +
+                "MusicVolume=100\n" +
+                "SoundVolume=100\n" +
+                "WindowHeight=400\n" +
+                "WindowWidth=640\n" +
+                "TextureHeight=1200\n" +
+                "TextureWidth=1920\n" +
+                "CD=NONE\n" +
+                "Music=RIX\n" +
+                "MIDISynth=native\n" +
+                "OPLCore=DBFLT\n" +
+                "OPLChip=OPL2\n" +
+                "Shader=scalefx.glslp\n" +
+                "GamePath=" + gamePath + "\n" +
+                "SavePath=" + gamePath + "\n" +
+                "ShaderPath=" + gamePath + "\n";
+            out.write(cfg.getBytes());
+            out.close();
+            Log.i(TAG, "Default config written to " + cfgFile.getPath());
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to write default config", e);
+        }
+    }
+
     public void onStart() {
         super.onStart();
         cachePath = getApplicationContext().getCacheDir().getPath();
-        loadPersistedUriFromCache();
         String dataPath = getApplicationContext().getFilesDir().getPath();
-        String sdlpalPath = basePath;
 
-        if (SettingsActivity.loadConfigFile()) {
-            String gamePath =  SettingsActivity.getConfigString(SettingsActivity.GamePath, true);
-            if (gamePath != null && !gamePath.isEmpty())
-                sdlpalPath = gamePath;
+        if (hasBuiltinAssets()) {
+            // 内置资源模式：解压 assets 到私有目录，跳过 SAF
+            extractAssets();
+            String gamePath = getBuiltinGamePath();
+            writeDefaultConfig(gamePath);
+            SetAppPath(gamePath, dataPath, cachePath);
+            basePath = gamePath;
+        } else {
+            // 外部资源模式：走原有 SAF 流程
+            loadPersistedUriFromCache();
+            String sdlpalPath = basePath;
+            if (SettingsActivity.loadConfigFile()) {
+                String gamePath = SettingsActivity.getConfigString(SettingsActivity.GamePath, true);
+                if (gamePath != null && !gamePath.isEmpty())
+                    sdlpalPath = gamePath;
+            }
+            SetAppPath(sdlpalPath, dataPath, cachePath);
         }
-        SetAppPath(sdlpalPath, dataPath, cachePath);
 
         if (!blocked)
             StartGame();
