@@ -365,7 +365,7 @@ public class MainActivity extends AppCompatActivity {
             FileOutputStream out = new FileOutputStream(cfgFile);
             String cfg = "KeepAspectRatio=1\n" +
                 "FullScreen=0\n" +
-                "LaunchSetting=0\n" +
+                "LaunchSetting=1\n" +
                 "Stereo=1\n" +
                 "UseSurroundOPL=1\n" +
                 "EnableKeyRepeat=0\n" +
