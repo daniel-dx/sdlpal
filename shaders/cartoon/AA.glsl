@@ -64,10 +64,10 @@ void main()
     gl_Position = MVPMatrix * VertexCoord;
     v_texCoord = TexCoord.xy;
 
-	t1.xy = v_texCoord + vec2(-dx,  0);
-	t2.xy = v_texCoord + vec2( dx,  0);
-	t3.xy = v_texCoord + vec2(  0,-dy);
-	t4.xy = v_texCoord + vec2(  0, dy);
+	t1.xy = v_texCoord + vec2(-dx,  0.0);
+	t2.xy = v_texCoord + vec2( dx,  0.0);
+	t3.xy = v_texCoord + vec2(  0.0,-dy);
+	t4.xy = v_texCoord + vec2(  0.0, dy);
 	t1.zw = v_texCoord + vec2(-dx,-dy);
 	t2.zw = v_texCoord + vec2(-dx, dy);
 	t3.zw = v_texCoord + vec2( dx,-dy);

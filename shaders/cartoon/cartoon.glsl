@@ -63,16 +63,16 @@ void main()
 {
 //VERTEX_STUFF0 PASS1_VERTEX (float3 p : POSITION, float2 tc : TEXCOORD0)
   
-	float dx = 1.0/InputSize.x/2;
-	float dy = 1.0/InputSize.y/2;
+	float dx = 1.0/InputSize.x/2.0;
+	float dy = 1.0/InputSize.y/2.0;
 
     gl_Position = MVPMatrix * VertexCoord;
     v_texCoord = TexCoord.xy;
 
-	t1.xy = v_texCoord + vec2(-dx,  0);
-	t2.xy = v_texCoord + vec2( dx,  0);
-	t3.xy = v_texCoord + vec2(  0,-dy);
-	t4.xy = v_texCoord + vec2(  0, dy);
+	t1.xy = v_texCoord + vec2(-dx,  0.0);
+	t2.xy = v_texCoord + vec2( dx,  0.0);
+	t3.xy = v_texCoord + vec2(  0.0,-dy);
+	t4.xy = v_texCoord + vec2(  0.0, dy);
 	t1.zw = v_texCoord + vec2(-dx,-dy);
 	t2.zw = v_texCoord + vec2(-dx, dy);
 	t3.zw = v_texCoord + vec2( dx,-dy);

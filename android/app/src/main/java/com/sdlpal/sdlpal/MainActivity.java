@@ -320,29 +320,32 @@ public class MainActivity extends AppCompatActivity {
         if (marker.exists()) return;
 
         destDir.mkdirs();
-        new File(destPath + "/shaders").mkdirs();
 
         try {
             AssetManager am = getAssets();
-            // 复制 gamedata/ 下的文件
-            String[] files = am.list("gamedata");
-            if (files != null) {
-                for (String f : files) {
-                    if (f.equals("shaders")) continue;
-                    copyAssetFile(am, "gamedata/" + f, destPath + "/" + f);
-                }
-            }
-            // 复制 gamedata/shaders/ 下的文件
-            String[] shaderFiles = am.list("gamedata/shaders");
-            if (shaderFiles != null) {
-                for (String f : shaderFiles) {
-                    copyAssetFile(am, "gamedata/shaders/" + f, destPath + "/shaders/" + f);
-                }
-            }
+            // 递归复制 gamedata/ 下的所有文件和子目录
+            copyAssetDir(am, "gamedata", destPath);
             marker.createNewFile();
             Log.i(TAG, "Assets extracted to " + destPath);
         } catch (IOException e) {
             Log.e(TAG, "Failed to extract assets", e);
+        }
+    }
+
+    private void copyAssetDir(AssetManager am, String assetDir, String destDir) throws IOException {
+        String[] entries = am.list(assetDir);
+        if (entries == null) return;
+        new File(destDir).mkdirs();
+        for (String entry : entries) {
+            String assetPath = assetDir + "/" + entry;
+            String destPath = destDir + "/" + entry;
+            // 尝试列出子条目，如果非空则为目录
+            String[] sub = am.list(assetPath);
+            if (sub != null && sub.length > 0) {
+                copyAssetDir(am, assetPath, destPath);
+            } else {
+                copyAssetFile(am, assetPath, destPath);
+            }
         }
     }
 

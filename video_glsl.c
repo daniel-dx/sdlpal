@@ -898,10 +898,6 @@ SDL_Texture *VIDEO_GLSL_CreateTexture(int width, int height)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, get_gl_wrap_mode(param_next_pass->wrap_mode, param_next_pass->scale_type_x));
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, get_gl_wrap_mode(param_next_pass->wrap_mode, param_next_pass->scale_type_y));
         }
-        //lacks parameter processing:
-        //srgb   - already srgb,    need figure what retroarch is
-        //float  - already float32, need figure what retroarch is
-        //mipmap - do we really need it?
     }
     
     //
@@ -943,6 +939,16 @@ void VIDEO_GLSL_RenderCopy()
         SDL_RenderClear(gpRenderer);
         gPassID++;
         SDL_RenderCopy(gpRenderer, prevTexture, NULL, NULL);
+        // debug: read back center pixel of each intermediate pass
+        if(frames < 3) {
+            unsigned char pixel[4] = {0};
+            int cx = (int)gGLSLP.shader_params[i].FBO.width / 2;
+            int cy = (int)gGLSLP.shader_params[i].FBO.height / 2;
+            glReadPixels(cx, cy, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+            UTIL_LogOutput(LOGLEVEL_DEBUG, "frame %d pass %d center pixel: RGBA(%d,%d,%d,%d) size=%.0fx%.0f\n",
+                (int)frames, i, pixel[0], pixel[1], pixel[2], pixel[3],
+                gGLSLP.shader_params[i].FBO.width, gGLSLP.shader_params[i].FBO.height);
+        }
         prevTexture = gGLSLP.shader_params[i].pass_sdl_texture;
     }
 
