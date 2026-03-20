@@ -29,7 +29,7 @@ LOCAL_SRC_FILES := $(SDLPAL_PATH)/sdl_compat/sdl_compat.c \
     $(wildcard $(LOCAL_PATH)/*.cpp) \
     $(wildcard $(LOCAL_PATH)/*.c)
 
-LOCAL_CFLAGS += -std=gnu99 -DPAL_HAS_PLATFORM_SPECIFIC_UTILS $(GENERATED) -DUSE_SDL3=1 -Daccess=SAF_access -Dfopen=SAF_fopen
+LOCAL_CFLAGS += -std=gnu99 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -Wno-error=implicit-function-declaration -DPAL_HAS_PLATFORM_SPECIFIC_UTILS $(GENERATED) -DUSE_SDL3=1 -Daccess=SAF_access -Dfopen=SAF_fopen
 
 LOCAL_CPPFLAGS += -std=c++11 -DPAL_HAS_PLATFORM_SPECIFIC_UTILS $(GENERATED)
 

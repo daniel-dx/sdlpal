@@ -282,3 +282,11 @@ emscripten/*.cpp
 
 # macOS Trashes
 *.DS_Store
+
+# tools 生成产物
+tools/*.png
+tools/__pycache__/
+
+# 不需要的第三方子模块（项目未引用）
+3rd/googletest/
+3rd/mingw-std-threads/

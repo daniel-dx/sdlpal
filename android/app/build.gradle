@@ -17,7 +17,7 @@ android {
         applicationId "com.sdlpal.sdlpal"
         minSdkVersion 21
         targetSdkVersion 36
-        ndkVersion "23.1.7779620"
+        ndkVersion "27.0.12077973"
         multiDexEnabled true
         externalNativeBuild {
             ndkBuild {

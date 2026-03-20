@@ -302,7 +302,11 @@ public class SettingsActivity extends AppCompatActivity {
                 String basePath = MainActivity.getBasePath();
                 if( requestCode == BROWSE_GAMEDIR_CODE ) {
                     if( !basePath.equals(filePath) ) {
-                        getContentResolver().releasePersistableUriPermission(MainActivity.getDocTreeUri(), Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                        try {
+                            getContentResolver().releasePersistableUriPermission(MainActivity.getDocTreeUri(), Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                        } catch (SecurityException e) {
+                            Log.w(TAG, "Failed to release previous URI permission", e);
+                        }
                         getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                         MainActivity.setPersistedUri(uri);
                         loadConfigFile();
